@@ -1,5 +1,5 @@
 package com.ies.poligono.sur.app.horario.service;
 
-public interface HorarioService {
+public class HorarioService {
 
 }
