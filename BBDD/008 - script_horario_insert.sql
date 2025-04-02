@@ -8,36 +8,6 @@ INSERT INTO Usuario (nombre, correo, contraseña, rol) VALUES
 ('Sara Núñez', 'sara@example.com', 'sara456', 'profesor'),
 ('Eva Díaz', 'eva@example.com', 'eva789', 'profesor');
 
--- Profesores
-INSERT INTO Profesor (id_usuario, nombre) VALUES
-(3, 'Carlos Gómez'),
-(4, 'Lucía Herrera'),
-(5, 'Pedro López'),
-(6, 'Sara Núñez'),
-(7, 'Eva Díaz');
-
--- Asignaturas
-INSERT INTO Asignatura (nombre) VALUES
-('Lengua'),
-('Ciencias Naturales'),
-('Física'),
-('Educación Física'),
-('Tecnología');
-
--- Cursos
-INSERT INTO Curso (nombre) VALUES
-('3º ESO'),
-('4º ESO'),
-('1º Bachillerato'),
-('2º Bachillerato');
-
--- Aulas
-INSERT INTO Aula (codigo) VALUES
-('C301'),
-('D404'),
-('E505'),
-('F606');
-
 -- Franjas
 INSERT INTO Franja (hora_inicio, hora_fin) VALUES
 ('10:00:00', '11:00:00'),

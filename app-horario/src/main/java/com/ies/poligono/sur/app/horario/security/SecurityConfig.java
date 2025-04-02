@@ -17,6 +17,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.ies.poligono.sur.app.horario.service.CustomUserDetailsService;
 
+import org.springframework.security.config.Customizer;
+
+
 
 
 
@@ -44,6 +47,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf().disable()
+		        .cors(Customizer.withDefaults()) // Habilita CORS
+		        .csrf(csrf -> csrf.disable())
                 .authorizeRequests().requestMatchers("/api/register", "/api/login").permitAll()
                 .anyRequest().authenticated()
                 .and().sessionManagement()
