@@ -43,9 +43,11 @@ public class HorarioServiceProcessorImpl implements HorarioServiceProcessor {
 
 	@Override
 	public void importarHorario(PostImportacionInputDTO inputDTO) {
+		
 		// decodificar el fichero
 		byte[] decoded = Base64.getDecoder().decode(inputDTO.getFile());
 		String decodedStr = new String(decoded, StandardCharsets.UTF_8);
+		
 		// leer el fichero línea a línea con la finalidad de obtener una List<Horario>
 		insertarHorarioImportado(montarLstHorarioDesdeTxt(decodedStr));
 	}
@@ -58,6 +60,7 @@ public class HorarioServiceProcessorImpl implements HorarioServiceProcessor {
 	 */
 	private List<Horario> montarLstHorarioDesdeTxt(String txtHorario) {
 		List<Horario> lstHorario = new ArrayList<Horario>();
+		
 		// recorrer txt línea por línea y añadir un registro al array por cada línea
 		try (BufferedReader reader = new BufferedReader(new StringReader(txtHorario))) {
 			String txtFilaHorario;
@@ -100,6 +103,7 @@ public class HorarioServiceProcessorImpl implements HorarioServiceProcessor {
 	private void insertarHorarioImportado(List<Horario> lstHorario) {
 		// borrar todos los registros del horario anterior
 		horarioService.borrarTodosLosHorarios();
+		
 		// iterar lista de horarios y hacer insert por cada registro
 		for (Horario horario : lstHorario) {
 			horarioService.crearHorario(horario);

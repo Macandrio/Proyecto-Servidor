@@ -32,7 +32,7 @@ public class Usuario {
 	@NotNull(message = "El email no puede ser nulo")
 	@NotEmpty(message = "El email no puede estar vacío")
 	@Email(message = "El email debe tener un formato válido")
-	@Column(name = "EMAIL")
+	@Column(name = "EMAIL", unique = true)
 	private String email;
 
 	@NotNull(message = "La contraseña no puede ser nula")

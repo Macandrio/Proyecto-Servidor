@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ies.poligono.sur.app.horario.model.Profesor;
 import com.ies.poligono.sur.app.horario.model.Usuario;
+import com.ies.poligono.sur.app.horario.service.ProfesorService;
 import com.ies.poligono.sur.app.horario.service.UsuarioService;
 
 import jakarta.validation.Valid;
@@ -28,6 +30,10 @@ public class UsuarioController {
 
 	@Autowired
 	UsuarioService usuarioService;
+	
+	@Autowired
+	private ProfesorService profesorService;
+
 
 	@GetMapping
 	public List<Usuario> obtenerUsuarios() {
@@ -35,11 +41,13 @@ public class UsuarioController {
 	}
 	
 	// Endpoint para crear un nuevo usuario
-	@PostMapping
-	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseEntity<Object> crearUsuario(@Valid @RequestBody Usuario usuario, BindingResult result) {
+	@PostMapping("/crear-con-profesor/{idProfesor}")
+	public ResponseEntity<?> crearUsuarioYVincularAProfesor(
+	        @PathVariable Long idProfesor,
+	        @Valid @RequestBody Usuario usuario,
+	        BindingResult result) {
+
 	    if (result.hasErrors()) {
-	        // Si hay errores de validación, puedes devolver un error 400 con un mapa de errores
 	        Map<String, String> errors = new HashMap<>();
 	        result.getAllErrors().forEach(error -> {
 	            String fieldName = ((org.springframework.validation.FieldError) error).getField();
@@ -48,9 +56,20 @@ public class UsuarioController {
 	        });
 	        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
 	    }
-	    Usuario usuarioCreado = usuarioService.crearUsuario(usuario);
-	    return new ResponseEntity<>(usuarioCreado, HttpStatus.CREATED);
+
+	    Usuario nuevoUsuario = usuarioService.crearUsuario(usuario);
+
+	    Profesor profesor = profesorService.findById(idProfesor);
+	    if (profesor == null) {
+	        return new ResponseEntity<>("Profesor no encontrado", HttpStatus.NOT_FOUND);
+	    }
+
+	    profesor.setUsuario(nuevoUsuario);
+	    profesorService.guardar(profesor); // Asegúrate de tener un método guardar en el servicio
+
+	    return new ResponseEntity<>(nuevoUsuario, HttpStatus.CREATED);
 	}
+
 	
 	// Endpoint para Eliminar un nuevo usuario
 	@DeleteMapping("/{id}")
