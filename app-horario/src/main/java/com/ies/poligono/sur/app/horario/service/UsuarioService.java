@@ -12,6 +12,7 @@ public interface UsuarioService {
 
 	public void eliminarUsuario(Long id);
 	
-	
+	public Usuario actualizarUsuario(Long id, Usuario usuarioActualizado);
+
 
 }

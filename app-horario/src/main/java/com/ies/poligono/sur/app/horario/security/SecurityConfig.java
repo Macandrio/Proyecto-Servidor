@@ -4,19 +4,20 @@ package com.ies.poligono.sur.app.horario.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.ies.poligono.sur.app.horario.service.CustomUserDetailsService;
+import jakarta.servlet.http.HttpServletResponse;
 
 
 
@@ -24,7 +25,7 @@ import com.ies.poligono.sur.app.horario.service.CustomUserDetailsService;
 
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity  
 public class SecurityConfig {
 
     @Autowired
@@ -45,21 +46,40 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf().disable()
-		        .cors(Customizer.withDefaults()) // Habilita CORS
-		        .csrf(csrf -> csrf.disable())
-                .authorizeRequests().requestMatchers("/api/register", "/api/login").permitAll()
+        http
+            .csrf(csrf -> csrf.disable())
+            .cors(cors -> {}) // Activar CORS con configuración por defecto
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/register", "/api/login").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/usuarios/**").hasRole("ADMINISTRADOR")
+                .requestMatchers(HttpMethod.PUT, "/api/usuarios/**").hasRole("ADMINISTRADOR")
+                .requestMatchers(HttpMethod.DELETE, "/api/usuarios/**").hasRole("ADMINISTRADOR")
                 .anyRequest().authenticated()
-                .and().sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-
-        http.addFilterBefore(jwtRequestFilter(), UsernamePasswordAuthenticationFilter.class);
+            )
+            
+            .exceptionHandling(eh -> eh
+                    .accessDeniedHandler(customAccessDeniedHandler())
+                )
+            
+            .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .addFilterBefore(jwtRequestFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
+
 
     @Bean
     public JwtRequestFilter jwtRequestFilter() {
         return new JwtRequestFilter(jwtService, customUserDetailsService);
     }
+    
+    @Bean
+    public AccessDeniedHandler customAccessDeniedHandler() {
+        return (request, response, accessDeniedException) -> {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\": \"No tienes permisos para acceder a esta funcionalidad.\"}");
+        };
+    }
+
 }

@@ -39,8 +39,14 @@ public class JwtService {
 	}
 
 	public String generateToken(UserDetails userDetails) {
-		Map<String, Object> claims = new HashMap<>();
-		return createToken(claims, userDetails.getUsername());
+	    Map<String, Object> claims = new HashMap<>();
+
+	    // Añadimos el rol del usuario a los claims
+	    userDetails.getAuthorities().forEach(authority -> {
+	        claims.put("role", authority.getAuthority()); // Ej: "ROLE_ADMINISTRADOR"
+	    });
+
+	    return createToken(claims, userDetails.getUsername());
 	}
 
 	private String createToken(Map<String, Object> claims, String subject) {
@@ -53,4 +59,9 @@ public class JwtService {
 		final String username = extractUsername(token);
 		return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
 	}
+	
+	public String extractRole(String token) {
+	    return extractAllClaims(token).get("role", String.class);
+	}
+
 }
