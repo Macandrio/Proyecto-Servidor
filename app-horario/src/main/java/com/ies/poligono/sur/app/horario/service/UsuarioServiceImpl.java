@@ -31,12 +31,14 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     public Usuario crearUsuario(Usuario usuario) {
-        // Encriptar la contraseña antes de guardar
+        
     	if (usuarioRepository.findByEmail(usuario.getEmail()) != null) {
             throw new IllegalArgumentException("Ya existe un usuario con ese email");
         }
+    	
         String contraseñaEncriptada = passwordEncoder.encode(usuario.getContraseña());
         usuario.setContraseña(contraseñaEncriptada);
+        
         return usuarioRepository.save(usuario);
     }
 
@@ -60,6 +62,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuarioRepository.delete(usuario);
     }
 
+    
     @Override
     public Usuario actualizarUsuario(Long id, Usuario usuarioActualizado) {
         Usuario usuarioExistente = usuarioRepository.findById(id)

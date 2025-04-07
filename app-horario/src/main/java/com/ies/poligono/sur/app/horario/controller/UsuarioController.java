@@ -69,8 +69,8 @@ public class UsuarioController {
 	    }
 
 	    profesor.setUsuario(nuevoUsuario);
-	    profesorService.guardar(profesor); // Asegúrate de tener un método guardar en el servicio
-
+	    profesorService.guardar(profesor);
+	    
 	    return new ResponseEntity<>(nuevoUsuario, HttpStatus.CREATED);
 	}
 
