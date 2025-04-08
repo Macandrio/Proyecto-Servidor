@@ -29,6 +29,7 @@ public class Usuario {
 
     @NotNull(message = "El email no puede ser nulo")
     @Email(message = "Debe tener un formato de email válido")
+    @Column(unique = true)
     private String email;
 
     @NotNull(message = "La contraseña no puede ser nula")
@@ -38,4 +39,8 @@ public class Usuario {
     @NotNull(message = "El rol no puede ser nulo")
     @Pattern(regexp = "^(profesor|administrador)$", message = "El rol debe ser 'profesor' o 'administrador'")
     private String rol;
+    
+    @Column(name = "cambiar_contraseña")
+    private boolean cambiarContraseña = true;
+
 }

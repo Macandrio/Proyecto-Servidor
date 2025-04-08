@@ -1,5 +1,6 @@
 package com.ies.poligono.sur.app.horario.service;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -63,22 +64,60 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     
+ // Método para actualizar un usuario
+    public Usuario actualizarUsuario(Long id_usuario, Usuario usuarioActualizado) {
+        // Verificar si el usuario existe en la base de datos
+        Optional<Usuario> usuarioExistenteOpt = usuarioRepository.findById(id_usuario);
+
+        if (usuarioExistenteOpt.isPresent()) {
+            Usuario usuarioExistente = usuarioExistenteOpt.get();
+
+            // Verificar si el nuevo correo electrónico ya existe y no pertenece al usuario actual
+            if (!usuarioExistente.getEmail().equals(usuarioActualizado.getEmail()) &&
+                usuarioRepository.existsByEmail(usuarioActualizado.getEmail())) {
+                throw new RuntimeException("El correo electrónico ya está registrado");
+            }
+
+            // Si la contraseña no está vacía, se encripta
+            if (usuarioActualizado.getContraseña() != null && !usuarioActualizado.getContraseña().isEmpty()) {
+                usuarioExistente.setContraseña(passwordEncoder.encode(usuarioActualizado.getContraseña()));
+            }
+
+            // Actualizar otros campos del usuario
+            usuarioExistente.setNombre(usuarioActualizado.getNombre());
+            usuarioExistente.setEmail(usuarioActualizado.getEmail());
+            usuarioExistente.setRol(usuarioActualizado.getRol());
+
+            // Guardar el usuario actualizado en la base de datos
+            return usuarioRepository.save(usuarioExistente);
+        } else {
+            // Si no se encuentra el usuario, retornamos null
+            return null;
+        }
+    }
+
+
+
+
+
+
+    
     @Override
-    public Usuario actualizarUsuario(Long id, Usuario usuarioActualizado) {
-        Usuario usuarioExistente = usuarioRepository.findById(id)
+    public Usuario actualizarContraseña(Long id, String nuevaContraseña) {
+        Usuario usuario = usuarioRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
-        usuarioExistente.setNombre(usuarioActualizado.getNombre());
-        usuarioExistente.setEmail(usuarioActualizado.getEmail());
-        usuarioExistente.setRol(usuarioActualizado.getRol());
-
-        // Solo actualiza contraseña si se ha enviado una nueva
-        if (usuarioActualizado.getContraseña() != null && !usuarioActualizado.getContraseña().isBlank()) {
-            String nuevaPass = passwordEncoder.encode(usuarioActualizado.getContraseña());
-            usuarioExistente.setContraseña(nuevaPass);
-        }
-
-        return usuarioRepository.save(usuarioExistente);
+        String nuevaPass = passwordEncoder.encode(nuevaContraseña);
+        usuario.setContraseña(nuevaPass);
+        usuario.setCambiarContraseña(false); // Ya no necesita cambiarla
+        return usuarioRepository.save(usuario);
     }
+
+	@Override
+	public Usuario obtenerUsuario(Long id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 
 }

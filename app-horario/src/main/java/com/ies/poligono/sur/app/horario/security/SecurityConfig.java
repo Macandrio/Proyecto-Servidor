@@ -34,27 +34,38 @@ public class SecurityConfig {
     @Autowired
     private JwtService jwtService;
 
+    
+//    cifrar contraseñas
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+//    autenticar usuarios con su email
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
+//    toda la lógica de seguridad de tus rutas
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
             .cors(cors -> {}) // Activar CORS con configuración por defecto
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/register", "/api/login").permitAll()
+                .requestMatchers("/api/login").permitAll()
+                
+                .requestMatchers(HttpMethod.PUT, "/api/usuarios/*/cambiar-contraseña")
+                .hasAnyRole("ADMINISTRADOR", "PROFESOR")
+                
+                .requestMatchers(HttpMethod.POST, "/api/register").hasRole("ADMINISTRADOR")
                 .requestMatchers(HttpMethod.POST, "/api/usuarios/**").hasRole("ADMINISTRADOR")
                 .requestMatchers(HttpMethod.PUT, "/api/usuarios/**").hasRole("ADMINISTRADOR")
                 .requestMatchers(HttpMethod.DELETE, "/api/usuarios/**").hasRole("ADMINISTRADOR")
                 .anyRequest().authenticated()
+                
+                
             )
             
             .exceptionHandling(eh -> eh
@@ -68,10 +79,12 @@ public class SecurityConfig {
     }
 
 
+//    Leer el token JWT de cada petición
     @Bean
     public JwtRequestFilter jwtRequestFilter() {
         return new JwtRequestFilter(jwtService, customUserDetailsService);
     }
+    
     
     @Bean
     public AccessDeniedHandler customAccessDeniedHandler() {
