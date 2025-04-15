@@ -1,5 +1,8 @@
 package com.ies.poligono.sur.app.horario.model;
 
+import java.time.LocalDate;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -21,8 +24,12 @@ public class Ausencia {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
+    private LocalDate fecha;
 
     private String descripcion;
+
+    private boolean justificada = false;
 
     @ManyToOne
     @JoinColumn(name = "id_horario", nullable = false)

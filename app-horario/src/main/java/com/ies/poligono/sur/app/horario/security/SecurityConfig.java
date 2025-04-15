@@ -52,14 +52,22 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
-            .cors(cors -> {}) // Activar CORS con configuración por defecto
+            .cors(cors -> {}) 
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/login").permitAll()
                 
+                
+                
+                .requestMatchers(HttpMethod.POST, "/api/ausencias/**").hasAnyRole("ADMINISTRADOR", "PROFESOR")
+                .requestMatchers(HttpMethod.GET, "/api/ausencias/**").hasAnyRole("ADMINISTRADOR", "PROFESOR")
+                .requestMatchers(HttpMethod.DELETE, "/api/ausencias/**").hasAnyRole("ADMINISTRADOR", "PROFESOR")
+
+
                 .requestMatchers(HttpMethod.PUT, "/api/usuarios/*/cambiar-contraseña")
                 .hasAnyRole("ADMINISTRADOR", "PROFESOR")
                 
                 .requestMatchers(HttpMethod.POST, "/api/register").hasRole("ADMINISTRADOR")
+                .requestMatchers(HttpMethod.GET, "/api/usuarios/**").hasRole("ADMINISTRADOR")
                 .requestMatchers(HttpMethod.POST, "/api/usuarios/**").hasRole("ADMINISTRADOR")
                 .requestMatchers(HttpMethod.PUT, "/api/usuarios/**").hasRole("ADMINISTRADOR")
                 .requestMatchers(HttpMethod.DELETE, "/api/usuarios/**").hasRole("ADMINISTRADOR")

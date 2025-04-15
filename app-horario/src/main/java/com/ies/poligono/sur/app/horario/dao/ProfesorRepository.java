@@ -1,6 +1,7 @@
 package com.ies.poligono.sur.app.horario.dao;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -16,5 +17,10 @@ public interface ProfesorRepository extends JpaRepository<Profesor, Long> {
 	List<Profesor> findByNombreContainingIgnoreCase(String nombre);
 
 	Profesor findByUsuario(Usuario usuario);
+
+	Optional<Profesor> findByUsuarioEmail(String email);
+
+	Optional<Profesor> findByUsuario_Email(String email);
+
 
 }

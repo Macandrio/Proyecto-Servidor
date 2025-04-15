@@ -41,6 +41,8 @@ public class Horario {
     @Column(nullable = false)
     private String dia;
 
-    @Column(nullable = false)
-    private Integer franja;
+    @ManyToOne
+    @JoinColumn(name = "franja", nullable = false)
+    private Franja franja;
+
 }

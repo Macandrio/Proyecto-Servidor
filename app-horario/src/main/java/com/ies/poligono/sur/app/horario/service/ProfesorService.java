@@ -16,4 +16,9 @@ public interface ProfesorService {
 
 	Profesor guardar(Profesor profesor);
 
+	Profesor findByEmailUsuario(String email);
+
+	Long obtenerIdProfesorPorUsername(String email);
+
+
 }

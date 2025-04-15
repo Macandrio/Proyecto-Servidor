@@ -11,10 +11,12 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.ies.poligono.sur.app.horario.dao.FranjaRepository;
 import com.ies.poligono.sur.app.horario.dto.PostImportacionInputDTO;
 import com.ies.poligono.sur.app.horario.model.Asignatura;
 import com.ies.poligono.sur.app.horario.model.Aula;
 import com.ies.poligono.sur.app.horario.model.Curso;
+import com.ies.poligono.sur.app.horario.model.Franja;
 import com.ies.poligono.sur.app.horario.model.Horario;
 import com.ies.poligono.sur.app.horario.model.Profesor;
 import com.ies.poligono.sur.app.horario.service.AsignaturaService;
@@ -40,6 +42,9 @@ public class HorarioServiceProcessorImpl implements HorarioServiceProcessor {
 
 	@Autowired
 	ProfesorService profesorService;
+	
+	@Autowired
+	FranjaRepository franjaRepository;
 
 	@Override
 	public void importarHorario(PostImportacionInputDTO inputDTO) {
@@ -81,17 +86,27 @@ public class HorarioServiceProcessorImpl implements HorarioServiceProcessor {
 	 */
 	private Horario montarRegistroDesdeFilaTxt(String txtFilaHorario) {
 		Horario horario = new Horario();
+		
 		String[] arrHorario = txtFilaHorario.split("\t");
+		
 		Asignatura asignatura = asignaturaService.findByNombre(arrHorario[0]);
 		horario.setAsignatura(asignatura);
+		
 		Curso curso = cursoService.findByNombre(arrHorario[1]);
 		horario.setCurso(curso);
+		
 		Aula aula = aulaService.findByCodigo(arrHorario[2]);
 		horario.setAula(aula);
+		
 		Profesor profesor = profesorService.findByNombre(arrHorario[3]);
 		horario.setProfesor(profesor);
 		horario.setDia(arrHorario[4]);
-		horario.setFranja(Integer.valueOf(arrHorario[5]));
+		
+		Long idFranja = Long.valueOf(arrHorario[5]);
+		Franja franja = franjaRepository.findById(idFranja)
+		    .orElseThrow(() -> new RuntimeException("Franja no encontrada con ID " + idFranja));
+		horario.setFranja(franja);
+
 		return horario;
 	}
 
