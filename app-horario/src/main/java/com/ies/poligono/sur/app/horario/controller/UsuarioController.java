@@ -77,7 +77,7 @@ public class UsuarioController {
 	    }
 
 	    profesor.setUsuario(nuevoUsuario);
-	    profesorService.guardar(profesor);
+	    profesorService.insertar(profesor);
 	    
 	    return new ResponseEntity<>(nuevoUsuario, HttpStatus.CREATED);
 	}

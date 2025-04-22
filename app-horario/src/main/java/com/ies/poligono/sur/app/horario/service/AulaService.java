@@ -6,4 +6,6 @@ public interface AulaService {
 
 	Aula findByCodigo(String nombre);
 
+	Aula insertar(Aula aula);
+
 }

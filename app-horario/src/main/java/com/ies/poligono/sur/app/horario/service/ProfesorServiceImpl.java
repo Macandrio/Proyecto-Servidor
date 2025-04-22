@@ -35,7 +35,7 @@ public class ProfesorServiceImpl implements ProfesorService {
     }
 	
 	@Override
-	public Profesor guardar(Profesor profesor) {
+	public Profesor insertar(Profesor profesor) {
 	    return profesorRepository.save(profesor);
 	}
 	

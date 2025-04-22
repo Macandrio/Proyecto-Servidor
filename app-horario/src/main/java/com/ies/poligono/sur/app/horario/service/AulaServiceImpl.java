@@ -16,4 +16,9 @@ public class AulaServiceImpl implements AulaService {
 	public Aula findByCodigo(String codigo) {
 		return aulaRepository.findByCodigo(codigo);
 	}
+
+	@Override
+	public Aula insertar(Aula aula) {
+		return aulaRepository.save(aula);
+	}
 }

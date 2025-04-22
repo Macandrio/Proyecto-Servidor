@@ -43,8 +43,8 @@ CREATE TABLE Franja (
 CREATE TABLE Horario (
     id INT AUTO_INCREMENT PRIMARY KEY,
     id_asignatura INT NOT NULL,
-    id_curso INT NOT NULL,
-    id_aula INT NOT NULL,
+    id_curso INT NULL,
+    id_aula INT NULL,
     id_profesor INT NOT NULL,
     dia VARCHAR(20) NOT NULL,
     franja INT NOT NULL,

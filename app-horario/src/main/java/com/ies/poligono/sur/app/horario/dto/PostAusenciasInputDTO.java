@@ -7,16 +7,17 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-public class CrearAusenciaDTO {
-	
+public class PostAusenciasInputDTO {
+
 	@NotNull(message = "La fecha no puede ser nula")
 	private LocalDate fecha;
-	
-    private LocalTime horaInicio;
-    
-    private LocalTime horaFin;
-    
-    private String motivo;
-    
 
+	private LocalTime horaInicio;
+
+	private LocalTime horaFin;
+
+	private String motivo;
+	
+	private Long idProfesor;
+	
 }

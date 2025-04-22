@@ -6,4 +6,6 @@ public interface CursoService {
 
 	public Curso findByNombre(String nombre);
 
+	public Curso insertar(Curso curso);
+
 }

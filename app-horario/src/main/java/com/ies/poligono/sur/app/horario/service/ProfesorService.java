@@ -9,16 +9,15 @@ public interface ProfesorService {
 	Profesor findByNombre(String nombre);
 
 	List<Profesor> buscarPorNombreParcial(String nombre);
-	
+
 	Profesor findById(Long id);
-	
+
 	List<Profesor> obtenerTodos();
 
-	Profesor guardar(Profesor profesor);
+	Profesor insertar(Profesor profesor);
 
 	Profesor findByEmailUsuario(String email);
 
 	Long obtenerIdProfesorPorUsername(String email);
-
 
 }

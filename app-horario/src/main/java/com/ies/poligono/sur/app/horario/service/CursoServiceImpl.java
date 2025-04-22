@@ -16,4 +16,9 @@ public class CursoServiceImpl implements CursoService {
 	public Curso findByNombre(String nombre) {
 		return cursoRepository.findByNombre(nombre);
 	}
+
+	@Override
+	public Curso insertar(Curso curso) {
+		return cursoRepository.save(curso);
+	}
 }

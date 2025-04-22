@@ -11,12 +11,11 @@ public interface UsuarioService {
 	public Usuario crearUsuario(Usuario usuario);
 
 	public void eliminarUsuario(Long id);
-	
+
 	public Usuario actualizarUsuario(Long id, Usuario usuarioActualizado);
 
 	public Usuario actualizarContraseña(Long id, String nuevaContraseña);
 
-	public Usuario obtenerUsuario(Long id);
-
+	public String generarEmailDesdeNombre(String nombre);
 
 }

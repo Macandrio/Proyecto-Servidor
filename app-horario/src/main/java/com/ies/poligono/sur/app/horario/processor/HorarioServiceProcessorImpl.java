@@ -8,10 +8,10 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.ies.poligono.sur.app.horario.dao.FranjaRepository;
 import com.ies.poligono.sur.app.horario.dto.PostImportacionInputDTO;
 import com.ies.poligono.sur.app.horario.model.Asignatura;
 import com.ies.poligono.sur.app.horario.model.Aula;
@@ -19,11 +19,14 @@ import com.ies.poligono.sur.app.horario.model.Curso;
 import com.ies.poligono.sur.app.horario.model.Franja;
 import com.ies.poligono.sur.app.horario.model.Horario;
 import com.ies.poligono.sur.app.horario.model.Profesor;
+import com.ies.poligono.sur.app.horario.model.Usuario;
 import com.ies.poligono.sur.app.horario.service.AsignaturaService;
 import com.ies.poligono.sur.app.horario.service.AulaService;
 import com.ies.poligono.sur.app.horario.service.CursoService;
+import com.ies.poligono.sur.app.horario.service.FranjaService;
 import com.ies.poligono.sur.app.horario.service.HorarioService;
 import com.ies.poligono.sur.app.horario.service.ProfesorService;
+import com.ies.poligono.sur.app.horario.service.UsuarioService;
 
 @Service
 public class HorarioServiceProcessorImpl implements HorarioServiceProcessor {
@@ -42,17 +45,20 @@ public class HorarioServiceProcessorImpl implements HorarioServiceProcessor {
 
 	@Autowired
 	ProfesorService profesorService;
-	
+
 	@Autowired
-	FranjaRepository franjaRepository;
+	UsuarioService usuarioService;
+
+	@Autowired
+	FranjaService franjaService;
 
 	@Override
 	public void importarHorario(PostImportacionInputDTO inputDTO) {
-		
+
 		// decodificar el fichero
 		byte[] decoded = Base64.getDecoder().decode(inputDTO.getFile());
 		String decodedStr = new String(decoded, StandardCharsets.UTF_8);
-		
+
 		// leer el fichero línea a línea con la finalidad de obtener una List<Horario>
 		insertarHorarioImportado(montarLstHorarioDesdeTxt(decodedStr));
 	}
@@ -65,7 +71,7 @@ public class HorarioServiceProcessorImpl implements HorarioServiceProcessor {
 	 */
 	private List<Horario> montarLstHorarioDesdeTxt(String txtHorario) {
 		List<Horario> lstHorario = new ArrayList<Horario>();
-		
+
 		// recorrer txt línea por línea y añadir un registro al array por cada línea
 		try (BufferedReader reader = new BufferedReader(new StringReader(txtHorario))) {
 			String txtFilaHorario;
@@ -86,28 +92,111 @@ public class HorarioServiceProcessorImpl implements HorarioServiceProcessor {
 	 */
 	private Horario montarRegistroDesdeFilaTxt(String txtFilaHorario) {
 		Horario horario = new Horario();
-		
+
 		String[] arrHorario = txtFilaHorario.split("\t");
-		
-		Asignatura asignatura = asignaturaService.findByNombre(arrHorario[0]);
+
+		Asignatura asignatura = procesarAsignatura(arrHorario[0]);
 		horario.setAsignatura(asignatura);
-		
-		Curso curso = cursoService.findByNombre(arrHorario[1]);
+
+		Curso curso = procesarCurso(arrHorario[1]);
 		horario.setCurso(curso);
-		
-		Aula aula = aulaService.findByCodigo(arrHorario[2]);
+
+		Aula aula = procesarAula(arrHorario[2]);
 		horario.setAula(aula);
-		
-		Profesor profesor = profesorService.findByNombre(arrHorario[3]);
+
+		Profesor profesor = procesarProfesor(arrHorario[3]);
 		horario.setProfesor(profesor);
 		horario.setDia(arrHorario[4]);
-		
+
 		Long idFranja = Long.valueOf(arrHorario[5]);
-		Franja franja = franjaRepository.findById(idFranja)
-		    .orElseThrow(() -> new RuntimeException("Franja no encontrada con ID " + idFranja));
+		Franja franja = franjaService.findById(idFranja).orElse(null);
 		horario.setFranja(franja);
 
 		return horario;
+	}
+
+	/**
+	 * Recupera la asignatura o la inserta si no existe
+	 * 
+	 * @param nombreAsignatura
+	 * @return
+	 */
+	private Asignatura procesarAsignatura(String nombreAsignatura) {
+		Asignatura asignatura = asignaturaService.findByNombre(nombreAsignatura);
+		if (asignatura == null) {
+			asignatura = new Asignatura();
+			asignatura.setNombre(nombreAsignatura);
+			asignatura = asignaturaService.insertar(asignatura);
+		}
+		return asignatura;
+	}
+
+	/**
+	 * Recupera el Curso o lo inserta si no existe
+	 * 
+	 * @param nombre
+	 * @return
+	 */
+	private Curso procesarCurso(String nombre) {
+		Curso curso = null;
+		if (StringUtils.isNotBlank(nombre)) {
+			curso = cursoService.findByNombre(nombre);
+			if (curso == null) {
+				curso = new Curso();
+				curso.setNombre(nombre);
+				curso = cursoService.insertar(curso);
+			}
+		}
+		return curso;
+	}
+
+	/**
+	 * Recupera el Aula o lo inserta si no existe
+	 * 
+	 * @param codigo
+	 * @return
+	 */
+	private Aula procesarAula(String codigo) {
+		Aula aula = null;
+
+		if (StringUtils.isNotBlank(codigo)) {
+			aula = aulaService.findByCodigo(codigo);
+			if (aula == null) {
+				aula = new Aula();
+				aula.setCodigo(codigo);
+				aula = aulaService.insertar(aula);
+			}
+		}
+
+		return aula;
+	}
+
+	/**
+	 * Recupera el Profesor o lo inserta si no existe
+	 * 
+	 * @param nombre
+	 * @return
+	 */
+	private Profesor procesarProfesor(String nombre) {
+		Profesor profesor = profesorService.findByNombre(nombre);
+		if (profesor == null) {
+			// asignar usuario al profesor
+			Usuario usuario = new Usuario();
+			String email = usuarioService.generarEmailDesdeNombre(nombre);
+			System.out.println("Validación email: " + email);
+			usuario.setEmail(email);
+			usuario.setContraseña("Pass123");
+			usuario.setRol("profesor");
+			usuario.setNombre(nombre);
+			usuario = usuarioService.crearUsuario(usuario);
+
+			// crear profesor
+			profesor = new Profesor();
+			profesor.setUsuario(usuario);
+			profesor.setNombre(nombre);
+			profesor = profesorService.insertar(profesor);
+		}
+		return profesor;
 	}
 
 	/**
@@ -118,7 +207,7 @@ public class HorarioServiceProcessorImpl implements HorarioServiceProcessor {
 	private void insertarHorarioImportado(List<Horario> lstHorario) {
 		// borrar todos los registros del horario anterior
 		horarioService.borrarTodosLosHorarios();
-		
+
 		// iterar lista de horarios y hacer insert por cada registro
 		for (Horario horario : lstHorario) {
 			horarioService.crearHorario(horario);

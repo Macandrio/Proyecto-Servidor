@@ -28,8 +28,4 @@ public class Profesor {
 
     private String nombre;
 
-	public Long getId() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 }
