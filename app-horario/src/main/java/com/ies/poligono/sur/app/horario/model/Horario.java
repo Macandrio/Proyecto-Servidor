@@ -27,11 +27,11 @@ public class Horario {
     private Asignatura asignatura;
 
     @ManyToOne
-    @JoinColumn(name = "id_curso", nullable = false)
+    @JoinColumn(name = "id_curso", nullable = true)
     private Curso curso;
 
     @ManyToOne
-    @JoinColumn(name = "id_aula", nullable = false)
+    @JoinColumn(name = "id_aula", nullable = true)
     private Aula aula;
 
     @ManyToOne
@@ -41,6 +41,8 @@ public class Horario {
     @Column(nullable = false)
     private String dia;
 
-    @Column(nullable = false)
-    private Integer franja;
+    @ManyToOne
+    @JoinColumn(name = "franja", nullable = false)
+    private Franja franja;
+
 }

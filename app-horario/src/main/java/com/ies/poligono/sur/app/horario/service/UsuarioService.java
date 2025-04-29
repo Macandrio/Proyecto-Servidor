@@ -8,4 +8,14 @@ public interface UsuarioService {
 
 	public List<Usuario> obtenerUsuarios();
 
+	public Usuario crearUsuario(Usuario usuario);
+
+	public void eliminarUsuario(Long id);
+
+	public Usuario actualizarUsuario(Long id, Usuario usuarioActualizado);
+
+	public Usuario actualizarContraseña(Long id, String nuevaContraseña);
+
+	public String generarEmailDesdeNombre(String nombre);
+
 }

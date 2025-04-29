@@ -1,5 +1,7 @@
 package com.ies.poligono.sur.app.horario.model;
 
+import java.time.LocalTime;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -20,7 +22,7 @@ public class Franja {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idFranja;
 
-    private String horaInicio;
+    private LocalTime horaInicio;
 
-    private String horaFin;
+    private LocalTime horaFin;
 }
