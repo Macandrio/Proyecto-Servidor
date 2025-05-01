@@ -1,7 +1,6 @@
 package com.ies.poligono.sur.app.horario.controller;
 
 import java.security.Principal;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -13,17 +12,20 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ies.poligono.sur.app.horario.dto.AusenciaAgrupadaDTO;
+import com.ies.poligono.sur.app.horario.dto.DeleteAusenciaInputDTO;
 import com.ies.poligono.sur.app.horario.dto.PostAusenciasInputDTO;
 import com.ies.poligono.sur.app.horario.model.Profesor;
 import com.ies.poligono.sur.app.horario.service.AusenciaService;
 import com.ies.poligono.sur.app.horario.service.ProfesorService;
+import com.ies.poligono.sur.app.horario.service.UsuarioService;
+import com.ies.poligono.sur.app.horario.service.UsuarioServiceImpl;
 
 import lombok.RequiredArgsConstructor;
 
@@ -61,35 +63,61 @@ public class AusenciaController {
 
 	@GetMapping
 	@PreAuthorize("hasAnyRole('PROFESOR', 'ADMINISTRADOR')")
-	public ResponseEntity<List<AusenciaAgrupadaDTO>> obtenerAusencias(Principal principal) {
-		// TODO: quitar parámetro de entrada y usar el contextHolder
-//		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		Profesor profesor = profesorService.findByEmailUsuario(principal.getName());
+	public ResponseEntity<List<AusenciaAgrupadaDTO>> obtenerAusencias(
+		    @RequestParam(required = false) Long idUsuario,
+		    Principal principal) {
+		
+	
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		Set<String> roles = auth.getAuthorities().stream().map(r -> r.getAuthority()).collect(Collectors.toSet());
+		
+		Long idProfesor;
+		
+		// Si eres administrador y pasas un idUsuario, lo usas para buscar el profesor correspondiente
+	    if (roles.contains("ROLE_ADMINISTRADOR") && idUsuario != null) {
+	        idProfesor = profesorService.obtenerIdProfesorPorUsuario(idUsuario);
+	    } else {
+	        // Si eres profesor (o admin sin idUsuario), buscas por el usuario autenticado
+	        String email = principal.getName();
+	        Profesor profesor = profesorService.findByEmailUsuario(email);
+	        idProfesor = profesor.getIdProfesor();
+	    }
 
-		System.out.println("EMAIL desde token: " + principal.getName());
-		System.out.println("Profesor encontrado: " + profesor.getNombre() + " - ID: " + profesor.getIdProfesor());
-
-		List<AusenciaAgrupadaDTO> ausencias = ausenciaService
-				.obtenerAusenciasAgrupadasV2(profesor.getIdProfesor());
-
-		return ResponseEntity.ok(ausencias);
+	    List<AusenciaAgrupadaDTO> ausencias = ausenciaService.obtenerAusenciasAgrupadasV2(idProfesor);
+	    return ResponseEntity.ok(ausencias);
 	}
 
-	@DeleteMapping("{fecha}")
+	@DeleteMapping
 	@PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('PROFESOR')")
-	public ResponseEntity<Void> eliminarAusenciasPorFecha(@PathVariable LocalDate fecha, Principal principal) {
+	public ResponseEntity<?> eliminarAusencia(@RequestBody DeleteAusenciaInputDTO dto) {
 
-		System.out.println("→ Petición DELETE recibida para fecha: " + fecha);
+	    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+	    Set<String> roles = auth.getAuthorities().stream().map(r -> r.getAuthority()).collect(Collectors.toSet());
 
-		String email = principal.getName();
-		System.out.println("→ Usuario autenticado con email: " + email);
+	    Long idProfesor = null;
+	    
+//	    Decimos si la ausencia eliminada es para nosotros o para otro profesor
+	    if (roles.contains("ROLE_ADMINISTRADOR") && dto.getIdProfesor() != null) {
+	        idProfesor = dto.getIdProfesor();
+	    } else {
+	        String email = auth.getName();
+	        idProfesor = profesorService.obtenerIdProfesorPorUsername(email);
+	    }
 
-		Long idProfesor = profesorService.obtenerIdProfesorPorUsername(email);
-		System.out.println("→ ID del profesor: " + idProfesor);
+//	    si la ausencia es un tramo 
+	    if (dto.getId() != null) {
+	        ausenciaService.eliminarAusenciaPorId(dto.getId());
+	        return ResponseEntity.noContent().build();
+	    }
 
-		ausenciaService.eliminarAusenciasPorFechaYProfesor(fecha, idProfesor);
+//	    Si la ausencia es una dia completo
+	    if (dto.getFecha() != null) {
+	        ausenciaService.eliminarAusenciasPorFechaYProfesor(dto.getFecha(), idProfesor);
+	        return ResponseEntity.noContent().build();
+	    }
 
-		return ResponseEntity.noContent().build();
+	    return ResponseEntity.badRequest().body("Debes proporcionar un ID o una fecha.");
 	}
+
 
 }

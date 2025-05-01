@@ -20,4 +20,6 @@ public interface ProfesorService {
 
 	Long obtenerIdProfesorPorUsername(String email);
 
+	Long obtenerIdProfesorPorUsuario(Long idUsuario);
+
 }

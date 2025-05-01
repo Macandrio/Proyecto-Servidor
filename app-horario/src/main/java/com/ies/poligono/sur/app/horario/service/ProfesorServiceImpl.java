@@ -58,6 +58,14 @@ public class ProfesorServiceImpl implements ProfesorService {
         System.out.println("→ ID del profesor encontrado: " + id);
         return id;
     }
+	
+	
+	public Long obtenerIdProfesorPorUsuario(Long idUsuario) {
+	    Profesor profesor = profesorRepository.findByUsuarioId(idUsuario)
+	        .orElseThrow(() -> new RuntimeException("No se encontró profesor con ese usuario"));
+	    return profesor.getIdProfesor();
+	}
+
 
 
 

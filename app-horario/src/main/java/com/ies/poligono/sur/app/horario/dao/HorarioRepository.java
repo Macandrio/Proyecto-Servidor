@@ -26,4 +26,7 @@ public interface HorarioRepository extends JpaRepository<Horario, Long> {
 	        LocalTime horaFin
 	    );
 	
+	List<Horario> findByProfesor_IdProfesor(Long idProfesor);
+
+	
 }

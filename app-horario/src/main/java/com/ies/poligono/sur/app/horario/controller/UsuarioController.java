@@ -1,15 +1,17 @@
 package com.ies.poligono.sur.app.horario.controller;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,8 +20,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.ies.poligono.sur.app.horario.dao.UsuarioRepository;
 import com.ies.poligono.sur.app.horario.dto.CambioContraseñaDTO;
@@ -50,8 +55,6 @@ public class UsuarioController {
 	
 	
 	// Endpoint para crear un nuevo usuario
-	
-	
 	@PostMapping("/crear-con-profesor/{idProfesor}")
 	@PreAuthorize("hasRole('ADMINISTRADOR')")
 	public ResponseEntity<?> crearUsuarioYVincularAProfesor(
@@ -84,8 +87,6 @@ public class UsuarioController {
 
 	
 	// Endpoint para Eliminar un nuevo usuario
-	
-
 	@DeleteMapping("/{id}")
 	@PreAuthorize("hasRole('ADMINISTRADOR')")
     @ResponseStatus(HttpStatus.NO_CONTENT) // Devuelve 204 No Content cuando la eliminación es exitosa
@@ -116,10 +117,7 @@ public class UsuarioController {
 	    }
     }
 
-	
-	
-//	Endpoint para cambiar la contraseña al inicio por primera vez
-	
+//	Endpoint para cambiar la contraseña al inicio por primera vez	
 	@PutMapping("/{id}/cambiar-contraseña")
 	@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PROFESOR')")
 	public ResponseEntity<Usuario> cambiarContraseña(
@@ -137,8 +135,38 @@ public class UsuarioController {
 	    return ResponseEntity.ok(actualizado);
 	}
 
+//	Endpoint para Subir una imagen	
+	@PostMapping("/{id}/imagen")
+	@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PROFESOR')")
+	public ResponseEntity<String> subirImagen(@PathVariable Long id, @RequestParam("imagen") MultipartFile archivo) {
+	    try {
+	        Usuario usuario = usuarioRepository.findById(id)
+	                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
+	        usuario.setImagen(archivo.getBytes());
+	        usuarioRepository.save(usuario);
 
+	        return ResponseEntity.ok("Imagen subida correctamente");
+	    } catch (IOException e) {
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al procesar la imagen");
+	    }
+	}
+
+//	Endpoint para Obtener imagen	
+	@GetMapping("/{id}/imagen")
+	@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PROFESOR')")
+	public ResponseEntity<?> obtenerImagen(@PathVariable Long id) {
+	    Usuario usuario = usuarioRepository.findById(id)
+	            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+
+	    if (usuario.getImagen() == null) {
+	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Este usuario no tiene imagen");
+	    }
+
+	    return ResponseEntity.ok()
+	            .contentType(MediaType.IMAGE_JPEG) // o IMAGE_PNG si usas PNG
+	            .body(new ByteArrayResource(usuario.getImagen()));
+	}
 
 
 }

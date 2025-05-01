@@ -22,5 +22,7 @@ public interface ProfesorRepository extends JpaRepository<Profesor, Long> {
 
 	Optional<Profesor> findByUsuario_Email(String email);
 
+	Optional<Profesor> findByUsuarioId(Long idUsuario);
+
 
 }
