@@ -61,6 +61,8 @@ public class HorarioController {
 
 	    if (roles.contains("ROLE_ADMINISTRADOR") && idProfesor != null) {
 	        // Admin que pasa idProfesor explícito
+	    	List<HorarioDetalleDTO> horarios = horarioService.obtenerHorarioPorProfesor(idProfesor);
+	        return ResponseEntity.ok(horarios);
 	    } else {
 	        // Profesor o admin sin id → sacar del token
 	        String email = auth.getName(); // del token JWT

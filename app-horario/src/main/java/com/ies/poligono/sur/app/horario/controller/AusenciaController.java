@@ -64,7 +64,7 @@ public class AusenciaController {
 	@GetMapping
 	@PreAuthorize("hasAnyRole('PROFESOR', 'ADMINISTRADOR')")
 	public ResponseEntity<List<AusenciaAgrupadaDTO>> obtenerAusencias(
-		    @RequestParam(required = false) Long idUsuario,
+			@RequestParam(name = "idusuario", required = false) Long idUsuario,
 		    Principal principal) {
 		
 	
