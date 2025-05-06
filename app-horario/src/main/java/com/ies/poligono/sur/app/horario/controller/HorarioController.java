@@ -43,9 +43,16 @@ public class HorarioController {
 	@PostMapping("/importacion")
 	@ResponseStatus(HttpStatus.CREATED)
 	public ResponseEntity<Object> importacion(@RequestBody PostImportacionInputDTO inputDTO) {
-		horarioServiceProcessor.importarHorario(inputDTO);
-		return new ResponseEntity<>(new Object(), HttpStatus.CREATED);
+	    try {
+	        horarioServiceProcessor.importarHorario(inputDTO);
+	        return ResponseEntity.status(HttpStatus.CREATED)
+	                             .body("Horario insertado correctamente");
+	    } catch (Exception e) {
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                             .body("Error al insertar el horario: " + e.getMessage());
+	    }
 	}
+
 	
 	
 	// Endpoint para Mostrar Horario profesor

@@ -57,6 +57,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/login").permitAll()
                 
                 
+                .requestMatchers(HttpMethod.PATCH, "/api/ausencias/justificar-dia").hasAnyRole("ADMINISTRADOR")
                 
                 .requestMatchers(HttpMethod.POST, "/api/ausencias/**").hasAnyRole("ADMINISTRADOR", "PROFESOR")
                 .requestMatchers(HttpMethod.GET, "/api/ausencias/**").hasAnyRole("ADMINISTRADOR", "PROFESOR")

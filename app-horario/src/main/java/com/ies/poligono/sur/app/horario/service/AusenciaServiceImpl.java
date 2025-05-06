@@ -281,5 +281,21 @@ public class AusenciaServiceImpl implements AusenciaService {
 		List<Ausencia> ausencias = ausenciaRepository.findByFechaAndHorario_Profesor_IdProfesor(fecha, idProfesor);
 		ausenciaRepository.deleteAll(ausencias);
 	}
+	
+	@Override
+	public void justificarAusenciasPorDia(LocalDate fecha, Long idProfesor) {
+	    List<Ausencia> ausencias = ausenciaRepository.findByFechaAndHorario_Profesor_idProfesor(fecha, idProfesor);
+	    for (Ausencia a : ausencias) {
+	        if (!a.isJustificada()) {
+	            a.setJustificada(true);
+	        }
+	    }
+	    ausenciaRepository.saveAll(ausencias);
+	}
+
+	@Override
+	public void borrarTodasLasAusencias() {
+	    ausenciaRepository.deleteAll();
+	}
 
 }

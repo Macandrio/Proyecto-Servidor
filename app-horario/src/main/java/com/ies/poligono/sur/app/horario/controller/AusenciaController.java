@@ -1,7 +1,9 @@
 package com.ies.poligono.sur.app.horario.controller;
 
 import java.security.Principal;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -12,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,8 +27,6 @@ import com.ies.poligono.sur.app.horario.dto.PostAusenciasInputDTO;
 import com.ies.poligono.sur.app.horario.model.Profesor;
 import com.ies.poligono.sur.app.horario.service.AusenciaService;
 import com.ies.poligono.sur.app.horario.service.ProfesorService;
-import com.ies.poligono.sur.app.horario.service.UsuarioService;
-import com.ies.poligono.sur.app.horario.service.UsuarioServiceImpl;
 
 import lombok.RequiredArgsConstructor;
 
@@ -119,5 +120,16 @@ public class AusenciaController {
 	    return ResponseEntity.badRequest().body("Debes proporcionar un ID o una fecha.");
 	}
 
+
+	@PatchMapping("/justificar-dia")
+	@PreAuthorize("hasRole('ADMINISTRADOR')")
+	public ResponseEntity<?> justificarAusenciasPorDia(@RequestBody Map<String, String> datos) {
+	    String fechaStr = datos.get("fecha");
+	    Long idProfesor = Long.parseLong(datos.get("idProfesor"));
+	    LocalDate fecha = LocalDate.parse(fechaStr);
+
+	    ausenciaService.justificarAusenciasPorDia(fecha, idProfesor);
+	    return ResponseEntity.ok().build();
+	}
 
 }

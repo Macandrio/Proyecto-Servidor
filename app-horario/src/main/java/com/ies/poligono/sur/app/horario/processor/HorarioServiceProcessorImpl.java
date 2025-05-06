@@ -22,6 +22,7 @@ import com.ies.poligono.sur.app.horario.model.Profesor;
 import com.ies.poligono.sur.app.horario.model.Usuario;
 import com.ies.poligono.sur.app.horario.service.AsignaturaService;
 import com.ies.poligono.sur.app.horario.service.AulaService;
+import com.ies.poligono.sur.app.horario.service.AusenciaService;
 import com.ies.poligono.sur.app.horario.service.CursoService;
 import com.ies.poligono.sur.app.horario.service.FranjaService;
 import com.ies.poligono.sur.app.horario.service.HorarioService;
@@ -51,10 +52,16 @@ public class HorarioServiceProcessorImpl implements HorarioServiceProcessor {
 
 	@Autowired
 	FranjaService franjaService;
+	
+	@Autowired
+	AusenciaService ausenciaService;
+
 
 	@Override
 	public void importarHorario(PostImportacionInputDTO inputDTO) {
-
+		// Primero borrar todas las ausencias
+	    ausenciaService.borrarTodasLasAusencias();
+	    
 		// decodificar el fichero
 		byte[] decoded = Base64.getDecoder().decode(inputDTO.getFile());
 		String decodedStr = new String(decoded, StandardCharsets.UTF_8);
