@@ -1,0 +1,31 @@
+version: "3.8"
+
+services:
+  mariadb:
+    image: mariadb
+    container_name: mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: bbdd-mi-app
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+    ports:
+      - "3307:3306"
+    networks:
+      - red_horario
+
+  backend:
+    image: macandrio/backend-app-horario:v0.1
+    container_name: Backend-app
+    restart: always
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mariadb
+    networks:
+      - red_horario
+
+networks:
+  red_horario:
+    driver: bridge
