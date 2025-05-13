@@ -55,23 +55,27 @@ public class SecurityConfig {
             .cors(cors -> {}) 
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/login").permitAll()
+                .requestMatchers("/api/recuperacion-password").permitAll()
                 
-                
+                // AUSENCIAS
                 .requestMatchers(HttpMethod.PATCH, "/api/ausencias/justificar-dia").hasAnyRole("ADMINISTRADOR")
-                
                 .requestMatchers(HttpMethod.POST, "/api/ausencias/**").hasAnyRole("ADMINISTRADOR", "PROFESOR")
                 .requestMatchers(HttpMethod.GET, "/api/ausencias/**").hasAnyRole("ADMINISTRADOR", "PROFESOR")
                 .requestMatchers(HttpMethod.DELETE, "/api/ausencias/**").hasAnyRole("ADMINISTRADOR", "PROFESOR")
 
-
-                .requestMatchers(HttpMethod.PUT, "/api/usuarios/*/cambiar-contraseña")
-                .hasAnyRole("ADMINISTRADOR", "PROFESOR")
-                
+                // USUARIOS
+                .requestMatchers(HttpMethod.PUT, "/api/usuarios/*/cambiar-contraseña").hasAnyRole("ADMINISTRADOR", "PROFESOR")
+                .requestMatchers(HttpMethod.GET, "/api/usuarios/*/imagen").hasAnyRole("ADMINISTRADOR", "PROFESOR")
+                .requestMatchers(HttpMethod.POST, "/api/usuarios/*/imagen").hasAnyRole("ADMINISTRADOR", "PROFESOR")
+                // PERMISOS GENERALES 
                 .requestMatchers(HttpMethod.POST, "/api/register").hasRole("ADMINISTRADOR")
                 .requestMatchers(HttpMethod.GET, "/api/usuarios/**").hasRole("ADMINISTRADOR")
                 .requestMatchers(HttpMethod.POST, "/api/usuarios/**").hasRole("ADMINISTRADOR")
                 .requestMatchers(HttpMethod.PUT, "/api/usuarios/**").hasRole("ADMINISTRADOR")
                 .requestMatchers(HttpMethod.DELETE, "/api/usuarios/**").hasRole("ADMINISTRADOR")
+                
+                
+                
                 .anyRequest().authenticated()
                 
                 

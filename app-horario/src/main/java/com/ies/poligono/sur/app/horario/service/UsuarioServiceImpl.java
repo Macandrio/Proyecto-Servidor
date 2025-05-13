@@ -98,13 +98,13 @@ public class UsuarioServiceImpl implements UsuarioService {
 	}
 
 	@Override
-	public Usuario actualizarContraseña(Long id, String nuevaContraseña) {
+	public Usuario actualizarContraseña(Long id, String nuevaContraseña, boolean cambiarContraseña) {
 		Usuario usuario = usuarioRepository.findById(id)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
 		String nuevaPass = passwordEncoder.encode(nuevaContraseña);
 		usuario.setContraseña(nuevaPass);
-		usuario.setCambiarContraseña(false); // Ya no necesita cambiarla
+		usuario.setCambiarContraseña(cambiarContraseña);
 		return usuarioRepository.save(usuario);
 	}
 

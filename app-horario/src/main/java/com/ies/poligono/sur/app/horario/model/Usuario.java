@@ -47,5 +47,4 @@ public class Usuario {
     @Column(name = "imagen", columnDefinition = "LONGBLOB")
     private byte[] imagen;
 
-
 }

@@ -14,7 +14,7 @@ public interface UsuarioService {
 
 	public Usuario actualizarUsuario(Long id, Usuario usuarioActualizado);
 
-	public Usuario actualizarContraseña(Long id, String nuevaContraseña);
+	public Usuario actualizarContraseña(Long id, String nuevaContraseña, boolean cambiarContraseña);
 
 	public String generarEmailDesdeNombre(String nombre);
 

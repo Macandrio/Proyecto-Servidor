@@ -131,13 +131,14 @@ public class UsuarioController {
 	        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 	    }
 
-	    Usuario actualizado = usuarioService.actualizarContraseña(id, dto.getNuevaContraseña());
+	    Usuario actualizado = usuarioService.actualizarContraseña(id, dto.getNuevaContraseña(), false);
 	    return ResponseEntity.ok(actualizado);
 	}
 
 //	Endpoint para Subir una imagen	
 	@PostMapping("/{id}/imagen")
-	@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PROFESOR')")
+//	@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PROFESOR')")
+	@PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('PROFESOR')")
 	public ResponseEntity<String> subirImagen(@PathVariable Long id, @RequestParam("imagen") MultipartFile archivo) {
 	    try {
 	        Usuario usuario = usuarioRepository.findById(id)
@@ -154,7 +155,8 @@ public class UsuarioController {
 
 //	Endpoint para Obtener imagen	
 	@GetMapping("/{id}/imagen")
-	@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PROFESOR')")
+//	@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PROFESOR')")
+	@PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('PROFESOR')")
 	public ResponseEntity<?> obtenerImagen(@PathVariable Long id) {
 	    Usuario usuario = usuarioRepository.findById(id)
 	            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
