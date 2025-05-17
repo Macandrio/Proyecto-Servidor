@@ -1,5 +1,12 @@
-DELETE FROM asignatura
-DELETE FROM aula
-DELETE FROM curso 
-DELETE FROM profesor 
-DELETE FROM horario 
+SET FOREIGN_KEY_CHECKS = 0;
+
+TRUNCATE TABLE asignatura;
+TRUNCATE TABLE aula;
+TRUNCATE TABLE ausencia;
+TRUNCATE TABLE curso;
+TRUNCATE TABLE horario;
+TRUNCATE TABLE profesor;
+TRUNCATE TABLE usuario;
+
+-- Vuelve a activar las restricciones
+SET FOREIGN_KEY_CHECKS = 1;

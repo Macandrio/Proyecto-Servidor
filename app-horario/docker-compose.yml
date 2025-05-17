@@ -16,7 +16,9 @@ services:
       - red_horario
 
   backend:
-    image: macandrio/backend-app-horario:v0.1
+    build:
+      context: .  # Este es el directorio donde está el Dockerfile
+    image: macandrio/backend-app-horario:v0.2  # La etiqueta que le pondremos
     container_name: Backend-app
     restart: always
     ports:

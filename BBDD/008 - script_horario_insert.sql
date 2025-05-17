@@ -35,3 +35,32 @@ INSERT INTO Ausencia (descripcion, id_horario) VALUES
 ('Viaje institucional', 6),
 ('Falta sin justificar', 7),
 ('Retraso por tráfico', 9);
+
+
+
+
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+TRUNCATE TABLE asignatura;
+TRUNCATE TABLE aula;
+TRUNCATE TABLE ausencia;
+TRUNCATE TABLE curso;
+TRUNCATE TABLE horario;
+TRUNCATE TABLE profesor;
+TRUNCATE TABLE usuario;
+
+-- Vuelve a activar las restricciones
+SET FOREIGN_KEY_CHECKS = 1;
+
+INSERT INTO usuario (cambiar_contraseña, contraseña, email, imagen, nombre, rol)
+VALUES (
+  0,
+  '$2a$10$yxjEzMQMa/EZCsdznIh.bu4oVXxyN./I7j2K8xRqHxv4w6htv7SP.',
+  'admin',
+  NULL,
+  'admin',
+  'administrador'
+);
+
+
