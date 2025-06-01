@@ -12,8 +12,6 @@ import lombok.Data;
 @AllArgsConstructor
 public class AusenciaAgrupadaDTO {
 	private LocalDate fecha;
-	// TODO: borrar DTO De tramos
-//	private List<AusenciaTramoDTO> tramos;
 	private List<Ausencia> lstAusenciaFecha;
 
 }

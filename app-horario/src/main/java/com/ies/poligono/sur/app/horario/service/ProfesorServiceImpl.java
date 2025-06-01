@@ -19,54 +19,55 @@ public class ProfesorServiceImpl implements ProfesorService {
 	public Profesor findByNombre(String nombre) {
 		return profesorRepository.findByNombre(nombre);
 	}
-	
+
 	public List<Profesor> buscarPorNombreParcial(String nombre) {
-	    return profesorRepository.findByNombreContainingIgnoreCase(nombre);
+		return profesorRepository.findByNombreContainingIgnoreCase(nombre);
 	}
 
 	@Override
 	public Profesor findById(Long id) {
 		return profesorRepository.findById(id).orElse(null);
 	}
-	
+
 	@Override
-    public List<Profesor> obtenerTodos() {
-        return profesorRepository.findAll();
-    }
-	
+	public List<Profesor> obtenerTodos() {
+		return profesorRepository.findAll();
+	}
+
 	@Override
 	public Profesor insertar(Profesor profesor) {
-	    return profesorRepository.save(profesor);
+		return profesorRepository.save(profesor);
 	}
-	
+
 	@Override
 	public Profesor findByEmailUsuario(String email) {
-	    return profesorRepository.findByUsuarioEmail(email)
-	            .orElseThrow(() -> new RuntimeException("Profesor no encontrado para el email: " + email));
+		return profesorRepository.findByUsuarioEmail(email)
+				.orElseThrow(() -> new RuntimeException("Profesor no encontrado para el email: " + email));
 	}
-	
+
 	@Override
-    public Long obtenerIdProfesorPorUsername(String email) {
-        Optional<Profesor> profesor = profesorRepository.findByUsuario_Email(email);
-        
-        if (profesor.isEmpty()) {
-            System.out.println("→ No se encontró ningún profesor para el email: " + email);
-            return null;
-        }
+	public Long obtenerIdProfesorPorUsername(String email) {
+		Optional<Profesor> profesor = profesorRepository.findByUsuario_Email(email);
 
-        Long id = profesor.get().getIdProfesor(); // o getId() según tu modelo
-        System.out.println("→ ID del profesor encontrado: " + id);
-        return id;
-    }
-	
-	
-	public Long obtenerIdProfesorPorUsuario(Long idUsuario) {
-	    Profesor profesor = profesorRepository.findByUsuarioId(idUsuario)
-	        .orElseThrow(() -> new RuntimeException("No se encontró profesor con ese usuario"));
-	    return profesor.getIdProfesor();
+		if (profesor.isEmpty()) {
+			System.out.println("→ No se encontró ningún profesor para el email: " + email);
+			return null;
+		}
+
+		Long id = profesor.get().getIdProfesor(); // o getId() según tu modelo
+		System.out.println("→ ID del profesor encontrado: " + id);
+		return id;
 	}
 
+	public Long obtenerIdProfesorPorUsuario(Long idUsuario) {
+		Profesor profesor = profesorRepository.findByUsuarioId(idUsuario)
+				.orElseThrow(() -> new RuntimeException("No se encontró profesor con ese usuario"));
+		return profesor.getIdProfesor();
+	}
 
-
+	@Override
+	public List<String> findProfesoresGuardia(String dia,Long franja) {
+		return profesorRepository.findProfesoresGuardia(dia, franja);
+	}
 
 }

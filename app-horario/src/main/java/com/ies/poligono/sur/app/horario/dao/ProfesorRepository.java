@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.ies.poligono.sur.app.horario.model.Profesor;
@@ -24,5 +25,13 @@ public interface ProfesorRepository extends JpaRepository<Profesor, Long> {
 
 	Optional<Profesor> findByUsuarioId(Long idUsuario);
 
+	@Query("""
+			SELECT h.profesor.nombre
+			FROM Horario h
+			WHERE  h.curso.nombre IN ('GUARDIA A', 'GUARDIA B', 'GUARDIA TARDE')
+			AND h.dia = :dia
+			AND h.franja.idFranja = :franja
+			""")
+	List<String> findProfesoresGuardia(String dia, Long franja);
 
 }

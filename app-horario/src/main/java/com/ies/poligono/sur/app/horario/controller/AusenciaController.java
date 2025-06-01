@@ -84,7 +84,7 @@ public class AusenciaController {
 	        idProfesor = profesor.getIdProfesor();
 	    }
 
-	    List<AusenciaAgrupadaDTO> ausencias = ausenciaService.obtenerAusenciasAgrupadasV2(idProfesor);
+	    List<AusenciaAgrupadaDTO> ausencias = ausenciaService.obtenerAusenciasAgrupadas(idProfesor);
 	    return ResponseEntity.ok(ausencias);
 	}
 

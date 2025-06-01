@@ -18,4 +18,6 @@ public interface UsuarioService {
 
 	public String generarEmailDesdeNombre(String nombre);
 
+	List<String> findLstEmailByRol(String rol);
+
 }

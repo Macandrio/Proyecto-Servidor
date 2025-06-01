@@ -4,26 +4,22 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ies.poligono.sur.app.horario.model.Usuario;
 
 public class AuthResponse {
-    private String token;
-    private Usuario usuario;
-    
-    @JsonIgnore
-    private String contraseña;
+	private String token;
+	private Usuario usuario;
 
+	@JsonIgnore
+	private String contraseña;
 
-    public AuthResponse(String token, Usuario usuario) {
-        this.token = token;
-        this.usuario = usuario;
-    }
+	public AuthResponse(String token, Usuario usuario) {
+		this.token = token;
+		this.usuario = usuario;
+	}
 
-    public String getToken() {
-        return token;
-    }
+	public String getToken() {
+		return token;
+	}
 
-    public Usuario getUsuario() {
-        return usuario;
-    }
-    
-    
-
+	public Usuario getUsuario() {
+		return usuario;
+	}
 }

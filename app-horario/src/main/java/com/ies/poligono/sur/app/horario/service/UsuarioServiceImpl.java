@@ -122,4 +122,9 @@ public class UsuarioServiceImpl implements UsuarioService {
 		return email;
 	}
 
+	@Override
+	public List<String> findLstEmailByRol(String rol) {
+		return usuarioRepository.findLstEmailByRol(rol);
+	}
+
 }

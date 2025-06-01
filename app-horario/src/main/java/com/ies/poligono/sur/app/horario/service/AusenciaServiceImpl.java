@@ -2,22 +2,18 @@ package com.ies.poligono.sur.app.horario.service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.ies.poligono.sur.app.horario.apputils.AusenciasUtils;
+import com.ies.poligono.sur.app.horario.apputils.AppHorarioUtils;
 import com.ies.poligono.sur.app.horario.dao.AusenciaRepository;
-import com.ies.poligono.sur.app.horario.dao.FranjaRepository;
 import com.ies.poligono.sur.app.horario.dao.HorarioRepository;
 import com.ies.poligono.sur.app.horario.dto.AusenciaAgrupadaDTO;
-import com.ies.poligono.sur.app.horario.dto.AusenciaTramoDTO;
+import com.ies.poligono.sur.app.horario.dto.AusenteGuardiaDTO;
 import com.ies.poligono.sur.app.horario.dto.PostAusenciasInputDTO;
 import com.ies.poligono.sur.app.horario.model.Ausencia;
 import com.ies.poligono.sur.app.horario.model.Horario;
@@ -30,9 +26,6 @@ public class AusenciaServiceImpl implements AusenciaService {
 
 	@Autowired
 	private AusenciaRepository ausenciaRepository;
-
-	@Autowired
-	private FranjaRepository franjaRepository;
 
 	// --------------------------------------------------------------------------
 	// MÉTODO: crearAusencia
@@ -53,7 +46,7 @@ public class AusenciaServiceImpl implements AusenciaService {
 			throw new IllegalArgumentException("La hora de inicio no puede ser posterior a la de fin.");
 		}
 
-		String diaAbrev = AusenciasUtils.obtenerDiaSemanaByFecha(dto.getFecha());
+		String diaAbrev = AppHorarioUtils.obtenerDiaSemanaAbrevByFecha(dto.getFecha());
 
 		// Buscar todos los horarios que tiene el profesor ese día y en ese rango
 		// horario
@@ -102,12 +95,13 @@ public class AusenciaServiceImpl implements AusenciaService {
 			throw new IllegalArgumentException("La hora de inicio no puede ser posterior a la de fin.");
 		}
 
-		String diaAbrev = AusenciasUtils.obtenerDiaSemanaByFecha(dto.getFecha());
+		String diaAbrev = AppHorarioUtils.obtenerDiaSemanaAbrevByFecha(dto.getFecha());
 		LocalTime horaInicio = dto.getHoraInicio() != null ? dto.getHoraInicio() : LocalTime.MIN;
 		LocalTime horaFin = dto.getHoraFin() != null ? dto.getHoraFin() : LocalTime.of(23, 59, 59);
 		// Buscar todos los horarios que tiene el profesor ese día y en ese rango
 		// horario
-		List<Horario> horarios = horarioRepository.findHorariosEntreHoras(idProfesor, diaAbrev, horaInicio, horaFin);
+		List<Horario> horarios = horarioRepository.findHorariosSolapados(idProfesor, diaAbrev, horaInicio, horaFin);
+
 
 		if (horarios.isEmpty()) {
 			throw new IllegalArgumentException("No tienes clases asignadas en ese tramo horario.");
@@ -146,37 +140,8 @@ public class AusenciaServiceImpl implements AusenciaService {
 		ausenciaRepository.deleteById(id);
 	}
 
-	// --------------------------------------------------------------------------
-	// MÉTODO: obtenerAusenciasAgrupadas
-	// Descripción: Devuelve todas las ausencias del profesor agrupadas por fecha
-	// y organizadas por tramos consecutivos
-	// --------------------------------------------------------------------------
 	@Override
 	public List<AusenciaAgrupadaDTO> obtenerAusenciasAgrupadas(Long idProfesor) {
-
-		// Consulta al repositorio
-		List<Ausencia> lstAusencias = ausenciaRepository
-				.findByHorarioProfesorIdProfesorOrderByHorarioDiaAscHorarioFranjaIdFranjaAsc(idProfesor);
-
-		// Agrupar por fecha
-		Map<LocalDate, List<Ausencia>> mapAusenciasPorFecha = lstAusencias.stream()
-				.collect(Collectors.groupingBy(Ausencia::getFecha));
-
-		List<AusenciaAgrupadaDTO> lstAusenciasAgrupadas = new ArrayList<>();
-
-		for (Entry<LocalDate, List<Ausencia>> entry : mapAusenciasPorFecha.entrySet()) {
-			LocalDate fecha = entry.getKey();
-			List<Ausencia> lstAusenciaFecha = entry.getValue();
-			// Ordenar por franja
-			lstAusenciaFecha.sort(Comparator.comparingInt(a -> a.getHorario().getFranja().getIdFranja().intValue()));
-//			lstAusenciasAgrupadas.add(new AusenciaAgrupadaDTO(fecha, agruparEnTramosConsecutivos(lstAusenciaFecha)));
-		}
-
-		return lstAusenciasAgrupadas;
-	}
-
-	@Override
-	public List<AusenciaAgrupadaDTO> obtenerAusenciasAgrupadasV2(Long idProfesor) {
 
 		// Consulta al repositorio
 		List<Ausencia> lstAusencias = ausenciaRepository
@@ -193,86 +158,6 @@ public class AusenciaServiceImpl implements AusenciaService {
 	}
 
 	// --------------------------------------------------------------------------
-	// MÉTODO: agruparEnTramosConsecutivos
-	// Descripción: Agrupa ausencias consecutivas con el mismo motivo en un solo
-	// tramo
-	// --------------------------------------------------------------------------
-	private List<AusenciaTramoDTO> agruparEnTramosConsecutivos(List<Ausencia> ausencias) {
-		List<AusenciaTramoDTO> resultado = new ArrayList<>();
-		if (ausencias.isEmpty()) {
-			return resultado;
-		}
-
-		Ausencia ausenciaActual = ausencias.get(0);
-		int franjaInicio = ausenciaActual.getHorario().getFranja().getIdFranja().intValue();
-		int franjaFin = franjaInicio;
-
-		List<String> asignaturas = new ArrayList<>();
-		List<String> aulas = new ArrayList<>();
-		List<String> cursos = new ArrayList<>();
-		String motivo = ausenciaActual.getDescripcion();
-
-		// Añade datos del primer horario
-		asignaturas.add(ausenciaActual.getHorario().getAsignatura().getNombre());
-		String aula = ausenciaActual.getHorario().getAula() != null ? ausenciaActual.getHorario().getAula().getCodigo()
-				: "—";
-		String curso = ausenciaActual.getHorario().getCurso() != null
-				? ausenciaActual.getHorario().getCurso().getNombre()
-				: "—";
-
-		aulas.add(aula);
-		cursos.add(curso);
-
-		for (int i = 1; i < ausencias.size(); i++) {
-			Ausencia siguiente = ausencias.get(i);
-			int franjaSiguiente = siguiente.getHorario().getFranja().getIdFranja().intValue();
-
-			// Si es consecutivo y el motivo es igual, se agrupa
-			if (franjaSiguiente == franjaFin + 1 && siguiente.getDescripcion().equals(motivo)) {
-				franjaFin = franjaSiguiente;
-				asignaturas.add(siguiente.getHorario().getAsignatura().getNombre());
-
-				String codigoAula = siguiente.getHorario().getAula() != null
-						? siguiente.getHorario().getAula().getCodigo()
-						: "—";
-				String nombreCurso = siguiente.getHorario().getCurso() != null
-						? siguiente.getHorario().getCurso().getNombre()
-						: "—";
-
-				aulas.add(codigoAula);
-				cursos.add(nombreCurso);
-			} else {
-				// Si no es consecutivo, se guarda el tramo actual y se inicia uno nuevo
-				resultado.add(crearTramo(franjaInicio, franjaFin, asignaturas, aulas, cursos, motivo,
-						ausenciaActual.isJustificada()));
-				franjaInicio = franjaSiguiente;
-				franjaFin = franjaSiguiente;
-				asignaturas = new ArrayList<>(List.of(siguiente.getHorario().getAsignatura().getNombre()));
-				aulas = new ArrayList<>(List.of(siguiente.getHorario().getAula().getCodigo()));
-				cursos = new ArrayList<>(List.of(siguiente.getHorario().getCurso().getNombre()));
-				motivo = siguiente.getDescripcion();
-			}
-		}
-
-		// Último tramo
-		resultado.add(crearTramo(franjaInicio, franjaFin, asignaturas, aulas, cursos, motivo,
-				ausenciaActual.isJustificada()));
-		return resultado;
-	}
-
-	// --------------------------------------------------------------------------
-	// MÉTODO: crearTramo
-	// Descripción: Crea un DTO con todos los datos del tramo (inicio, fin, etc.)
-	// --------------------------------------------------------------------------
-	private AusenciaTramoDTO crearTramo(int franjaInicio, int franjaFin, List<String> asignaturas, List<String> aulas,
-			List<String> cursos, String motivo, boolean justificada) {
-		LocalTime horaInicio = franjaRepository.findById((long) franjaInicio).get().getHoraInicio();
-		LocalTime horaFin = franjaRepository.findById((long) franjaFin).get().getHoraFin();
-
-		return new AusenciaTramoDTO(horaInicio, horaFin, asignaturas, aulas, cursos, motivo, justificada);
-	}
-
-	// --------------------------------------------------------------------------
 	// MÉTODO: eliminarAusenciasPorFechaYProfesor
 	// Descripción: Borra todas las ausencias de un profesor en una fecha concreta
 	// --------------------------------------------------------------------------
@@ -281,21 +166,26 @@ public class AusenciaServiceImpl implements AusenciaService {
 		List<Ausencia> ausencias = ausenciaRepository.findByFechaAndHorario_Profesor_IdProfesor(fecha, idProfesor);
 		ausenciaRepository.deleteAll(ausencias);
 	}
-	
+
 	@Override
 	public void justificarAusenciasPorDia(LocalDate fecha, Long idProfesor) {
-	    List<Ausencia> ausencias = ausenciaRepository.findByFechaAndHorario_Profesor_idProfesor(fecha, idProfesor);
-	    for (Ausencia a : ausencias) {
-	        if (!a.isJustificada()) {
-	            a.setJustificada(true);
-	        }
-	    }
-	    ausenciaRepository.saveAll(ausencias);
+		List<Ausencia> ausencias = ausenciaRepository.findByFechaAndHorario_Profesor_idProfesor(fecha, idProfesor);
+		for (Ausencia a : ausencias) {
+			if (!a.isJustificada()) {
+				a.setJustificada(true);
+			}
+		}
+		ausenciaRepository.saveAll(ausencias);
 	}
 
 	@Override
 	public void borrarTodasLasAusencias() {
-	    ausenciaRepository.deleteAll();
+		ausenciaRepository.deleteAll();
+	}
+
+	@Override
+	public List<AusenteGuardiaDTO> findProfesoresAusentes(LocalDate fecha, Long idFranja) {
+		return ausenciaRepository.findProfesoresAusentes(fecha, idFranja);
 	}
 
 }

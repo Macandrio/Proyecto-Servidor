@@ -3,7 +3,7 @@ version: "3.8"
 services:
   mariadb:
     image: mariadb
-    container_name: mariadb
+    container_name: mariadb-horario
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root
@@ -13,19 +13,19 @@ services:
     ports:
       - "3307:3306"
     networks:
-      - red_horario
+      - red_horario_horario
 
   backend:
     image: macandrio/backend-app-horario:v0.1
-    container_name: Backend-app
+    container_name: backend-app-horario
     restart: always
     ports:
       - "8081:8081"
     depends_on:
       - mariadb
     networks:
-      - red_horario
+      - red_horario_horario
 
 networks:
-  red_horario:
+  red_horario_horario:
     driver: bridge

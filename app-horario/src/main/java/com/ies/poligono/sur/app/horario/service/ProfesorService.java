@@ -22,4 +22,6 @@ public interface ProfesorService {
 
 	Long obtenerIdProfesorPorUsuario(Long idUsuario);
 
+	List<String> findProfesoresGuardia(String dia, Long franja);
+
 }

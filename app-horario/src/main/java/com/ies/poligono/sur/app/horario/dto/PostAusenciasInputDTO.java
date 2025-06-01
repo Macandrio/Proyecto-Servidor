@@ -17,7 +17,7 @@ public class PostAusenciasInputDTO {
 	private LocalTime horaFin;
 
 	private String motivo;
-	
+
 	private Long idProfesor;
-	
+
 }

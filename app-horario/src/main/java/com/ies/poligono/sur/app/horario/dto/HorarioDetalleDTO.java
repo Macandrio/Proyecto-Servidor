@@ -10,9 +10,9 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class HorarioDetalleDTO {
-    private Franja franja;
-    private String dia;
-    private Asignatura asignatura;
-    private Aula aula;
-    private Curso curso;
+	private Franja franja;
+	private String dia;
+	private Asignatura asignatura;
+	private Aula aula;
+	private Curso curso;
 }
