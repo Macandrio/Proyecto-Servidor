@@ -32,6 +32,8 @@ public class RecuperacionPasswordServiceImpl implements RecuperacionPasswordServ
 			// enviar email con la pass sin encriptar
 			enviarEmailRecuperacion(usuario.getEmail(), nuevaPassword);
 
+		}else {
+			throw new IllegalArgumentException("Ese correo no existe");
 		}
 
 	}

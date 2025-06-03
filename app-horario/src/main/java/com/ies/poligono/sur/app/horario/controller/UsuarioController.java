@@ -132,18 +132,26 @@ public class UsuarioController {
 	@PostMapping("/{id}/imagen")
 	@PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('PROFESOR')")
 	public ResponseEntity<String> subirImagen(@PathVariable Long id, @RequestParam("imagen") MultipartFile archivo) {
-		try {
-			Usuario usuario = usuarioRepository.findById(id)
-					.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+	    try {
+	        // Validar que el archivo es una imagen
+	        String contentType = archivo.getContentType();
+	        if (contentType == null || 
+	            !(contentType.equals("image/jpeg") || contentType.equals("image/png") || contentType.equals("image/gif"))) {
+	            return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body("Solo se permiten imágenes JPEG, PNG o GIF");
+	        }
 
-			usuario.setImagen(archivo.getBytes());
-			usuarioRepository.save(usuario);
+	        Usuario usuario = usuarioRepository.findById(id)
+	                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
-			return ResponseEntity.ok("Imagen subida correctamente");
-		} catch (IOException e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al procesar la imagen");
-		}
+	        usuario.setImagen(archivo.getBytes());
+	        usuarioRepository.save(usuario);
+
+	        return ResponseEntity.ok("Imagen subida correctamente");
+	    } catch (IOException e) {
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al procesar la imagen");
+	    }
 	}
+
 
 //	Endpoint para Obtener imagen	
 	@GetMapping("/{id}/imagen")

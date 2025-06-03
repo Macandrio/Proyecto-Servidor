@@ -23,7 +23,7 @@ public class RecuperacionPasswordController {
 	@PostMapping
 	public ResponseEntity<?> recuperarPassword(@RequestBody PostRecuperacionPasswordInputDTO dto) {
 		recuperacionPasswordService.recuperarPassword(dto);
-		return ResponseEntity.ok().build();
+		return ResponseEntity.ok("Correo enviado correctamente");
 	}
 
 }
